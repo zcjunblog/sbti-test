@@ -1,0 +1,35 @@
+<svg width="160" height="160" viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="sbti-bg" x1="24" y1="18" x2="138" y2="144" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0D5B51"/>
+      <stop offset="0.55" stop-color="#11473E"/>
+      <stop offset="1" stop-color="#C89559"/>
+    </linearGradient>
+    <radialGradient id="sbti-glow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(48 36) rotate(42) scale(118 92)">
+      <stop stop-color="#F6D99D" stop-opacity="0.56"/>
+      <stop offset="1" stop-color="#F6D99D" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="sbti-shadow" x="0" y="0" width="160" height="160" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feFlood flood-opacity="0" result="BackgroundImageFix"/>
+      <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+      <feOffset dy="10"/>
+      <feGaussianBlur stdDeviation="10"/>
+      <feComposite in2="hardAlpha" operator="out"/>
+      <feColorMatrix type="matrix" values="0 0 0 0 0.0156863 0 0 0 0 0.121569 0 0 0 0 0.109804 0 0 0 0.22 0"/>
+      <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_0_1"/>
+      <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_0_1" result="shape"/>
+    </filter>
+  </defs>
+  <g filter="url(#sbti-shadow)">
+    <rect x="12" y="12" width="136" height="136" rx="38" fill="url(#sbti-bg)"/>
+    <rect x="12" y="12" width="136" height="136" rx="38" fill="url(#sbti-glow)"/>
+    <rect x="21" y="21" width="118" height="118" rx="30" stroke="#FFF8EB" stroke-opacity="0.26" stroke-width="2"/>
+    <circle cx="80" cy="80" r="40" fill="#FFF8EB" fill-opacity="0.06"/>
+    <path d="M43 46H117" stroke="#F2D49B" stroke-width="4" stroke-linecap="round" opacity="0.9"/>
+    <path d="M52 118H108" stroke="#F2D49B" stroke-width="4" stroke-linecap="round" opacity="0.7"/>
+    <circle cx="40" cy="80" r="3.5" fill="#F6D99D"/>
+    <circle cx="120" cy="80" r="3.5" fill="#F6D99D"/>
+    <text x="80" y="78" text-anchor="middle" fill="#FFF8EB" font-size="34" font-weight="700" letter-spacing="6" font-family="Space Grotesk, Segoe UI, Arial, sans-serif">SB</text>
+    <text x="80" y="111" text-anchor="middle" fill="#FFF8EB" font-size="34" font-weight="700" letter-spacing="6" font-family="Space Grotesk, Segoe UI, Arial, sans-serif">TI</text>
+  </g>
+</svg>

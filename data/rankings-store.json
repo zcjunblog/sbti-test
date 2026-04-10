@@ -1,0 +1,225 @@
+{
+  "snapshot": {
+    "totalSubmissions": 29290,
+    "updatedAt": "2026-04-10T10:21:32.038Z",
+    "entries": [
+      {
+        "typeCode": "SEXY",
+        "slug": "sexy",
+        "cn": "尤物",
+        "count": 2848,
+        "rank": 1,
+        "share": 0.0972
+      },
+      {
+        "typeCode": "LOVE-R",
+        "slug": "love-r",
+        "cn": "多情者",
+        "count": 2403,
+        "rank": 2,
+        "share": 0.082
+      },
+      {
+        "typeCode": "CTRL",
+        "slug": "ctrl",
+        "cn": "拿捏者",
+        "count": 2198,
+        "rank": 3,
+        "share": 0.075
+      },
+      {
+        "typeCode": "THIN-K",
+        "slug": "thin-k",
+        "cn": "思考者",
+        "count": 1734,
+        "rank": 4,
+        "share": 0.0592
+      },
+      {
+        "typeCode": "MALO",
+        "slug": "malo",
+        "cn": "吗喽",
+        "count": 1471,
+        "rank": 5,
+        "share": 0.0502
+      },
+      {
+        "typeCode": "ATM-er",
+        "slug": "atm-er",
+        "cn": "送钱者",
+        "count": 1452,
+        "rank": 6,
+        "share": 0.0496
+      },
+      {
+        "typeCode": "WOC!",
+        "slug": "woc",
+        "cn": "握草人",
+        "count": 1437,
+        "rank": 7,
+        "share": 0.0491
+      },
+      {
+        "typeCode": "ZZZZ",
+        "slug": "zzzz",
+        "cn": "装死者",
+        "count": 1343,
+        "rank": 8,
+        "share": 0.0459
+      },
+      {
+        "typeCode": "FUCK",
+        "slug": "fuck",
+        "cn": "草者",
+        "count": 1243,
+        "rank": 9,
+        "share": 0.0424
+      },
+      {
+        "typeCode": "OJBK",
+        "slug": "ojbk",
+        "cn": "无所谓人",
+        "count": 1210,
+        "rank": 10,
+        "share": 0.0413
+      },
+      {
+        "typeCode": "MUM",
+        "slug": "mum",
+        "cn": "妈妈",
+        "count": 1130,
+        "rank": 11,
+        "share": 0.0386
+      },
+      {
+        "typeCode": "GOGO",
+        "slug": "gogo",
+        "cn": "行者",
+        "count": 1108,
+        "rank": 12,
+        "share": 0.0378
+      },
+      {
+        "typeCode": "FAKE",
+        "slug": "fake",
+        "cn": "伪人",
+        "count": 1030,
+        "rank": 13,
+        "share": 0.0352
+      },
+      {
+        "typeCode": "SOLO",
+        "slug": "solo",
+        "cn": "孤儿",
+        "count": 1026,
+        "rank": 14,
+        "share": 0.035
+      },
+      {
+        "typeCode": "BOSS",
+        "slug": "boss",
+        "cn": "领导者",
+        "count": 1001,
+        "rank": 15,
+        "share": 0.0342
+      },
+      {
+        "typeCode": "THAN-K",
+        "slug": "than-k",
+        "cn": "感恩者",
+        "count": 946,
+        "rank": 16,
+        "share": 0.0323
+      },
+      {
+        "typeCode": "MONK",
+        "slug": "monk",
+        "cn": "僧人",
+        "count": 901,
+        "rank": 17,
+        "share": 0.0308
+      },
+      {
+        "typeCode": "SHIT",
+        "slug": "shit",
+        "cn": "愤世者",
+        "count": 894,
+        "rank": 18,
+        "share": 0.0305
+      },
+      {
+        "typeCode": "IMSB",
+        "slug": "imsb",
+        "cn": "傻者",
+        "count": 805,
+        "rank": 19,
+        "share": 0.0275
+      },
+      {
+        "typeCode": "JOKE-R",
+        "slug": "joker",
+        "cn": "小丑",
+        "count": 754,
+        "rank": 20,
+        "share": 0.0257
+      },
+      {
+        "typeCode": "Dior-s",
+        "slug": "dior-s",
+        "cn": "屌丝",
+        "count": 610,
+        "rank": 21,
+        "share": 0.0208
+      },
+      {
+        "typeCode": "OH-NO",
+        "slug": "oh-no",
+        "cn": "哦不人",
+        "count": 545,
+        "rank": 22,
+        "share": 0.0186
+      },
+      {
+        "typeCode": "DEAD",
+        "slug": "dead",
+        "cn": "死者",
+        "count": 472,
+        "rank": 23,
+        "share": 0.0161
+      },
+      {
+        "typeCode": "DRUNK",
+        "slug": "drunk",
+        "cn": "酒鬼",
+        "count": 456,
+        "rank": 24,
+        "share": 0.0156
+      },
+      {
+        "typeCode": "POOR",
+        "slug": "poor",
+        "cn": "贫困者",
+        "count": 181,
+        "rank": 25,
+        "share": 0.0062
+      },
+      {
+        "typeCode": "IMFW",
+        "slug": "imfw",
+        "cn": "废物",
+        "count": 89,
+        "rank": 26,
+        "share": 0.003
+      },
+      {
+        "typeCode": "HHHH",
+        "slug": "hhhh",
+        "cn": "傻乐者",
+        "count": 3,
+        "rank": 27,
+        "share": 0.0001
+      }
+    ]
+  },
+  "submissions": {}
+}
