@@ -6,17 +6,24 @@
 
 ## 1. 项目概述
 
-SBTI（Spectral Brain Type Index）赛博人格测定局是一个基于原始 sbti.dev 题库与类型图鉴重构的镜像测试站。用户通过回答一系列人格测试题目，系统根据 15 个维度的得分匹配 27 种赛博人格类型（含 2 种隐藏人格）。
+SBTI（Spectral Brain Type Index）赛博人格测定局是一个赛博人格测试站点。用户通过回答一系列人格测试题目，系统根据 15 个维度的得分匹配 27 种赛博人格类型（含 2 种隐藏人格）。
 
 ### 核心定位
 - **内容型工具站**: 以人格测试为核心玩法，产出可分享的结果内容
 - **社交裂变导向**: 结果页支持复制链接、系统分享、海报下载，适合微信/社群传播
 - **移动端优先**: 页面节奏、触控区域和字体层级针对手机端重新优化
+- **非营利开源**: 不收费、不投放广告、不收集个人信息
+
+### 部署架构（CloudBase 分支）
+- **前端**: Next.js 静态导出（`output: "export"`），部署到腾讯云 CloudBase 静态网站托管
+- **后端**: CloudBase 云函数（事件函数 + 云接入路由）
+- **数据库**: CloudBase 文档型数据库（类 MongoDB）
+- **域名**: sbti.x4v.cn
 
 ## 2. 用户旅程
 
 ```
-首页 → 开始测试 → 逐题作答(31-32题) → 生成结果 → 查看结果页 → 分享/提交榜单
+首页 → 开始测试 → 逐题作答(31-32题) → 生成结果 → 查看结果页 → 自动入榜 + 分享
                                                           ↓
                                                     浏览人格图鉴
                                                           ↓
@@ -24,10 +31,10 @@ SBTI（Spectral Brain Type Index）赛博人格测定局是一个基于原始 sb
 ```
 
 ### 关键流程
-1. **测试流程**: 题目随机洗牌，逐题推进，过程中按条件插入隐藏饮酒支线
+1. **测试流程**: 题目随机洗牌，逐题推进（带选中高亮 + 淡出切换动画），过程中按条件插入隐藏饮酒支线
 2. **结果生成**: 完成答题后，本地计算 15 维画像，与标准人格模板做距离匹配
-3. **分享闭环**: 结果页提供三种分享方式（复制链接、系统分享、海报下载）
-4. **榜单沉淀**: 结果可提交到本地排行榜，形成站内热度反馈
+3. **自动入榜**: 进入结果页后自动提交到排行榜（通过云函数写入云数据库），无需手动点击
+4. **分享闭环**: 结果页提供三种分享方式（复制链接、系统分享、海报下载），均带触感反馈和 toast 提示
 
 ## 3. 核心功能模块
 
@@ -35,6 +42,7 @@ SBTI（Spectral Brain Type Index）赛博人格测定局是一个基于原始 sb
 - **题库**: 30 道标准计分题 + 2 道隐藏支线题（饮酒入口题 + 饮酒跟进题）
 - **洗牌**: 标准题随机打乱，隐藏入口题随机插入
 - **分支逻辑**: 当饮酒入口题选择特定选项（value=3）时，追加饮酒跟进题
+- **答题动画**: 选中高亮（绿色边框 + ✓）→ 其他选项淡出 → 整体淡出切换下一题
 - **实际作答**: 通常 31 题（30标准 + 1隐藏入口），命中支线时 32 题
 
 ### 3.2 判定逻辑
@@ -49,50 +57,58 @@ SBTI（Spectral Brain Type Index）赛博人格测定局是一个基于原始 sb
 - 人格类型卡片（插画 + 中文名 + 代号 + 简介 + 描述）
 - 个性化 15 维画像（基于本人答题数据）
 - 匹配度与精准命中维度数
+- 自动入榜后显示当前排名和人数
 - 隐藏人格备选显示
 
 ### 3.4 分享系统
-- **复制链接**: navigator.clipboard API
+- **复制链接**: navigator.clipboard API + 触感反馈 + toast 提示
 - **系统分享**: Web Share API，优先尝试附带海报图片
 - **海报下载**: Canvas 绘制 1080x1600 PNG，包含人格信息 + 二维码
+- **Toast**: 黑色半透明居中弹窗（微信小程序风格），3.5 秒自动消失
 
 ### 3.5 排行榜
-- 本地 JSON 文件存储（data/rankings-store.json）
-- 基于 submissionId 防重复提交
-- 实时计算排名和占比
-- 写入队列保证并发安全
+- 通过 CloudBase 云函数读写云数据库
+- 基于 submissionId 作为文档 _id 天然去重
+- `_.inc(1)` 原子递增，支持并发
+- rank 和 share 由云函数实时计算，不存数据库
 
 ## 4. 页面结构
 
-| 路由 | 页面 | 说明 |
-|------|------|------|
-| `/` | 首页 | 项目介绍、数据指标、能力展示、人格走马灯、维度说明、Top3 榜单 |
-| `/test` | 测试页 | 答题引擎，逐题推进，完成后跳转结果页 |
-| `/result/[slug]` | 结果页 | 人格详情、15维画像、分享工具、榜单提交 |
-| `/types` | 人格图鉴 | 浏览全部 27 种人格卡片（标准 + 隐藏） |
-| `/rankings` | 人气榜单 | Top3 展示 + 完整排名列表 |
-| `/about` | 测评说明 | 题库结构、判定逻辑、隐藏分支、授权说明 |
+| 路由 | 页面 | 渲染策略 | 说明 |
+|------|------|----------|------|
+| `/` | 首页 | 静态 + CSR | 静态壳 + 客户端组件加载 Top3 |
+| `/test` | 测试页 | 静态 + CSR | 页面壳静态，测试逻辑客户端 |
+| `/result/[slug]` | 结果页 | SSG | generateStaticParams 预渲染 27 个页面 |
+| `/types` | 人格图鉴 | 静态 | 纯静态数据 |
+| `/rankings` | 人气榜单 | 静态 + CSR | 客户端组件加载排行数据 |
+| `/about` | 测评说明 | 静态 | 纯静态内容 |
+| `/legal/*` | 法律页面 | 静态 | 用户协议、隐私政策、免责声明 |
 
 ## 5. 数据模型
 
-### 题目 (Question)
-```
-{ id, dim?, text, options: [{label, value}], special?, kind? }
+### 云数据库集合
+
+**`sbti-rankings`**（27 条文档）
+```json
+{ "_id": "SEXY", "typeCode": "SEXY", "slug": "sexy", "cn": "尤物", "count": 2848 }
 ```
 
-### 人格类型 (SbtiType)
-```
-{ code, cn, intro, desc, slug, image, special, pattern?, canonicalItems }
-```
-
-### 结果快照 (ResultSnapshot)
-```
-{ submissionId, finalTypeCode, bestNormalCode, rawScores, levels, similarity, exact, special, modeKicker, badge, sub, secondaryTypeCode?, rankingSubmission? }
+**`sbti-submissions`**（每次提交一条）
+```json
+{ "_id": "submissionId-uuid", "typeCode": "SEXY", "submittedAt": "2026-04-11T..." }
 ```
 
-### 排行榜条目 (RankingEntry)
-```
-{ typeCode, slug, cn, count, rank, share }
+### 客户端 localStorage — sbti:result-snapshot:v1
+```json
+{
+  "submissionId": "UUID",
+  "finalTypeCode": "string",
+  "rawScores": { "[dimension]": number },
+  "levels": { "[dimension]": "L|M|H" },
+  "similarity": number,
+  "exact": number,
+  "rankingSubmission": { "submittedAt": "ISO8601", "count": number, "rank": number }
+}
 ```
 
 ## 6. 设计语言
@@ -101,4 +117,5 @@ SBTI（Spectral Brain Type Index）赛博人格测定局是一个基于原始 sb
 - **字体**: Space Grotesk（UI/正文） + Noto Serif SC（标题/展示）
 - **圆角**: 大量使用 24px-40px 圆角卡片
 - **视觉层次**: eyebrow 标签 + 大标题 + 描述文 + 卡片网格
-- **动效**: 走马灯、悬浮上移、进度条渐变
+- **动效**: 走马灯、答题切换淡入淡出、按钮按压缩放半透明、toast 滑入
+- **触感**: 关键按钮点击触发 navigator.vibrate()

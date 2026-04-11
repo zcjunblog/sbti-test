@@ -104,6 +104,14 @@ export function ResultPanel({ type, suggestedTypes }: ResultPanelProps) {
     return () => clearTimeout(timer);
   }, [actionMessage]);
 
+  // Auto-submit to rankings on first visit from quiz
+  useEffect(() => {
+    if (!snapshot || snapshot.finalTypeCode !== type.code) return;
+    if (snapshot.rankingSubmission) return; // already submitted
+    submitToRankings();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [snapshot]);
+
   const cameFromQuiz = searchParams.get("source") === "quiz";
   const hasMatchingSnapshot = snapshot?.finalTypeCode === type.code;
   const personalizedItems = hasMatchingSnapshot
@@ -368,7 +376,7 @@ export function ResultPanel({ type, suggestedTypes }: ResultPanelProps) {
         }
         return objectUrl;
       });
-      setActionMessage("海报预览已生成，确认后再下载。");
+      // poster preview opened, no toast needed
     } catch {
       setActionMessage("海报生成失败了，先复制链接分享也可以。");
     } finally {
@@ -514,7 +522,7 @@ export function ResultPanel({ type, suggestedTypes }: ResultPanelProps) {
             </div>
 
             <p className="text-xs leading-6 text-[var(--ink-soft)]">
-              网页只能调起系统分享，不能强制指定微信接管；如果微信没接住内容，直接发海报最稳。
+              复制链接适合直接丢群里，系统分享适合手机端转发，海报适合朋友圈与社媒传播。
             </p>
 
             {hasMatchingSnapshot && snapshot ? (
@@ -534,7 +542,11 @@ export function ResultPanel({ type, suggestedTypes }: ResultPanelProps) {
                 <div>
                   <p className="text-xs uppercase tracking-[0.2em] text-[var(--ink-soft)]">榜单状态</p>
                   <p className="mt-2 text-lg font-semibold text-[var(--ink-strong)]">
-                    {rankingStatus ? `已入榜 #${rankingStatus.rank}` : "尚未提交到榜单"}
+                    {rankingStatus
+                      ? `第 ${rankingStatus.rank} 名 · ${rankingStatus.count.toLocaleString("zh-CN")} 人`
+                      : isSubmitting
+                        ? "提交中…"
+                        : "尚未入榜"}
                   </p>
                 </div>
               </div>
@@ -615,28 +627,36 @@ export function ResultPanel({ type, suggestedTypes }: ResultPanelProps) {
                   <div className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-[var(--emerald)]/10 text-[var(--emerald)]">
                     <Medal size={18} />
                   </div>
-                  <div className="space-y-3">
-                    <div>
+                  {rankingStatus ? (
+                    <div className="space-y-1">
                       <p className="text-base font-semibold text-[var(--ink-strong)]">
-                        将我的结果写入本地榜单
+                        已入榜 · 当前排名第 {rankingStatus.rank} 位
                       </p>
-                      <p className="mt-1 text-sm leading-7 text-[var(--ink-soft)]">
-                        这样排行榜会记录这次测试，方便后续继续做站内传播和统计。
+                      <p className="text-sm leading-7 text-[var(--ink-soft)]">
+                        共 {rankingStatus.count.toLocaleString("zh-CN")} 人选择了这个类型。
                       </p>
                     </div>
-                    <button
-                      type="button"
-                      onClick={submitToRankings}
-                      disabled={!!rankingStatus || isSubmitting}
-                      className="inline-flex items-center justify-center rounded-full bg-[var(--emerald)] px-5 py-3 text-sm font-semibold !text-white shadow-[0_18px_32px_rgba(6,63,55,0.22)] transition hover:-translate-y-0.5 hover:bg-[var(--emerald-strong)] disabled:translate-y-0 disabled:opacity-70"
-                    >
-                      {rankingStatus
-                        ? `已入榜 #${rankingStatus.rank}`
-                        : isSubmitting
-                          ? "提交中"
-                          : "加入榜单"}
-                    </button>
-                  </div>
+                  ) : (
+                    <div className="space-y-3">
+                      <div>
+                        <p className="text-base font-semibold text-[var(--ink-strong)]">
+                          {isSubmitting ? "正在提交到榜单…" : "将我的结果写入榜单"}
+                        </p>
+                        <p className="mt-1 text-sm leading-7 text-[var(--ink-soft)]">
+                          这样排行榜会记录这次测试，方便后续继续做站内传播和统计。
+                        </p>
+                      </div>
+                      {!isSubmitting && (
+                        <button
+                          type="button"
+                          onClick={submitToRankings}
+                          className="inline-flex items-center justify-center rounded-full bg-[var(--emerald)] px-5 py-3 text-sm font-semibold !text-white shadow-[0_18px_32px_rgba(6,63,55,0.22)] transition hover:-translate-y-0.5 hover:bg-[var(--emerald-strong)]"
+                        >
+                          加入榜单
+                        </button>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             ) : (

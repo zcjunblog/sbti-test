@@ -1,6 +1,6 @@
-# SBTI 赛博人格测定局 - 技术栈
+# SBTI 赛博人格测定局 - 技术栈（CloudBase 分支）
 
-> **职责**: 记录项目使用的技术栈，保持最简单但最健壮的选型。写任何代码前应了解当前技术栈，避免引入不兼容的依赖。
+> **职责**: 记录项目使用的技术栈。写任何代码前应了解当前技术栈，避免引入不兼容的依赖。
 
 ---
 
@@ -8,18 +8,17 @@
 
 | 技术 | 版本 | 用途 |
 |------|------|------|
-| **Next.js** | 16.2.3 | 全栈框架，App Router 模式 |
-| **React** | 19.2.4 | UI 渲染（使用 React 19 新特性如 useTransition） |
+| **Next.js** | 16.2.3 | 前端框架，App Router，静态导出（`output: "export"`） |
+| **React** | 19.2.4 | UI 渲染（useTransition、Suspense） |
 | **TypeScript** | ^5 | 类型安全 |
 
-> **重要**: 本项目使用 Next.js 16，与训练数据中的版本可能存在 breaking changes。写代码前必须查阅 `node_modules/next/dist/docs/` 中的相关指南，留意废弃通知。
+> **重要**: Next.js 16 可能有 breaking changes。写代码前查阅 `node_modules/next/dist/docs/`。
 
 ## 样式方案
 
 | 技术 | 版本 | 用途 |
 |------|------|------|
-| **Tailwind CSS** | ^4 | 原子化 CSS，使用 v4 新语法（@import "tailwindcss"） |
-| **@tailwindcss/postcss** | ^4 | PostCSS 插件集成 |
+| **Tailwind CSS** | ^4 | 原子化 CSS，v4 语法（`@import "tailwindcss"`） |
 | **clsx** | ^2.1.1 | 条件类名拼接 |
 
 ## 字体
@@ -36,45 +35,51 @@
 | **lucide-react** | ^1.8.0 | 图标库 |
 | **qrcode** | ^1.5.4 | 海报二维码生成 |
 
-## 开发工具
+## 云端服务（CloudBase）
 
-| 技术 | 用途 |
+| 服务 | 用途 |
 |------|------|
-| **ESLint** | 代码规范检查（eslint-config-next） |
-| **PostCSS** | CSS 处理管线 |
+| **静态网站托管** | 部署 Next.js 静态导出产物 |
+| **云函数**（事件函数） | `sbti-rankings-get` + `sbti-rankings-submit` |
+| **云接入**（HTTP 路由） | 将云函数暴露为 HTTP 端点，自动处理 CORS |
+| **文档型数据库** | `sbti-rankings` + `sbti-submissions` 集合 |
+| **@cloudbase/node-sdk** | ^3.18（云函数内使用） |
 
 ## 数据存储
 
 | 方式 | 用途 |
 |------|------|
-| **JSON 文件** (`data/rankings-store.json`) | 服务端排行榜持久化存储 |
-| **JSON 数据** (`src/data/sbti-data.json`) | 题库、人格类型、维度定义等静态数据 |
-| **JSON 种子** (`src/data/rankings-seed.json`) | 排行榜初始种子数据 |
+| **CloudBase 云数据库** `sbti-rankings` | 排行榜数据（27 个人格类型的 count） |
+| **CloudBase 云数据库** `sbti-submissions` | 提交去重记录（submissionId 作为 _id） |
+| **静态 JSON** `src/data/sbti-data.json` | 题库、人格类型、维度定义 |
+| **静态 JSON** `src/data/rankings-seed.json` | 排行榜初始种子数据 |
 | **localStorage** | 客户端结果快照暂存 |
 
 ## 渲染策略
 
 | 页面 | 策略 | 说明 |
 |------|------|------|
-| `/` (首页) | `force-dynamic` | 需要实时读取排行榜数据 |
-| `/test` | 静态 + CSR | 页面壳静态渲染，测试逻辑在客户端 |
-| `/result/[slug]` | 动态 SSR | 根据 slug 查找人格类型 |
-| `/types` | 静态 | 人格图鉴纯静态数据 |
-| `/rankings` | `force-dynamic` | 实时读取排行榜 |
-| `/about` | 静态 | 测评说明纯静态内容 |
-| API routes | 动态 | 排行榜读写 API |
+| 所有页面 | **静态导出** | `output: "export"` 生成纯 HTML |
+| `/result/[slug]` | **SSG** | `generateStaticParams` 预渲染 27 个页面 |
+| 首页 Top3 | **CSR** | 客户端 `useEffect` 调用云函数 |
+| 排行榜页 | **CSR** | 客户端 `useEffect` 调用云函数 |
+| 结果页榜单提交 | **CSR** | 自动调用云函数提交 |
 
 ## 部署
 
-- **构建**: `next build`
-- **启动**: `next start`
-- **开发**: `next dev`
-- **推荐平台**: Vercel 或任何支持 Node.js 的服务器
+| 步骤 | 命令/操作 |
+|------|-----------|
+| 构建 | `npm run build`（生成 `out/` 目录） |
+| 静态托管 | CloudBase 静态网站托管，部署 `out/` 目录 |
+| 云函数 | `tcb fn deploy` 或控制台上传 |
+| 种子数据 | `tcb db nosql execute` 或 `node scripts/seed-database.js` |
+| 本地预览 | `npx serve out` |
+| 开发模式 | `npm run dev`（排行榜走线上云函数） |
 
 ## 不使用的技术（有意省略）
 
-- **数据库**: 不使用，排行榜用本地 JSON 文件即可满足需求
-- **状态管理库**: 不使用 Redux/Zustand 等，React 内置 state 足够
-- **CSS-in-JS**: 不使用 styled-components 等，Tailwind CSS 覆盖全部样式需求
-- **认证系统**: 不使用，通过 submissionId 做轻量防重复
-- **测试框架**: 当前未配置，后续可按需加入
+- **Node.js 运行时**: 静态导出，不需要服务端
+- **Next.js API 路由**: 已迁移到云函数
+- **本地 JSON 文件存储**: 已迁移到云数据库
+- **状态管理库**: React 内置 state 足够
+- **认证系统**: 通过 submissionId 做轻量防重复
