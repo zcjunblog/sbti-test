@@ -15,12 +15,22 @@ const fs = require("fs");
 const path = require("path");
 
 const ENV_ID = process.env.TCB_ENV_ID;
+const SECRET_ID = process.env.TCB_SECRET_ID;
+const SECRET_KEY = process.env.TCB_SECRET_KEY;
+
 if (!ENV_ID) {
-  console.error("请设置环境变量 TCB_ENV_ID，例如：TCB_ENV_ID=xxx node scripts/seed-database.js");
+  console.error("请设置环境变量，例如：");
+  console.error("  TCB_ENV_ID=xxx TCB_SECRET_ID=xxx TCB_SECRET_KEY=xxx node scripts/seed-database.js");
   process.exit(1);
 }
 
-const app = tcb.init({ env: ENV_ID });
+const initOptions = { env: ENV_ID };
+if (SECRET_ID && SECRET_KEY) {
+  initOptions.secretId = SECRET_ID;
+  initOptions.secretKey = SECRET_KEY;
+}
+
+const app = tcb.init(initOptions);
 const db = app.database();
 
 async function main() {
@@ -34,7 +44,7 @@ async function main() {
   console.log("\n正在写入 rankings 集合...");
   for (const entry of seed.entries) {
     try {
-      await db.collection("rankings").doc(entry.typeCode).set({
+      await db.collection("sbti-rankings").doc(entry.typeCode).set({
         typeCode: entry.typeCode,
         slug: entry.slug,
         cn: entry.cn,
@@ -49,7 +59,7 @@ async function main() {
   // Ensure submissions collection exists
   console.log("\n确保 submissions 集合存在...");
   try {
-    await db.createCollection("submissions");
+    await db.createCollection("sbti-submissions");
     console.log("  ✓ submissions 集合已创建");
   } catch (err) {
     if (err.message && err.message.includes("already exists")) {

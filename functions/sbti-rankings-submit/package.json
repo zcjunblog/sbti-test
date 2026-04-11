@@ -1,5 +1,5 @@
 {
-  "name": "rankings-get",
+  "name": "sbti-rankings-submit",
   "version": "1.0.0",
   "main": "index.js",
   "dependencies": {

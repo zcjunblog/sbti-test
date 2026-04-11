@@ -18,7 +18,7 @@ exports.main = async (event) => {
 
   try {
     const { data: entries } = await db
-      .collection("rankings")
+      .collection("sbti-rankings")
       .orderBy("count", "desc")
       .limit(50)
       .get();

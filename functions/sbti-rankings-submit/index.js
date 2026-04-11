@@ -55,7 +55,7 @@ exports.main = async (event) => {
 
     // Dedup: use submissionId as _id, rely on unique constraint
     try {
-      await db.collection("submissions").add({
+      await db.collection("sbti-submissions").add({
         _id: submissionId,
         typeCode: finalTypeCode,
         submittedAt: new Date().toISOString(),
@@ -74,13 +74,13 @@ exports.main = async (event) => {
 
     // Atomic increment
     await db
-      .collection("rankings")
+      .collection("sbti-rankings")
       .where({ typeCode: finalTypeCode })
       .update({ count: _.inc(1) });
 
     // Read back updated rankings to compute rank
     const { data: entries } = await db
-      .collection("rankings")
+      .collection("sbti-rankings")
       .orderBy("count", "desc")
       .limit(50)
       .get();

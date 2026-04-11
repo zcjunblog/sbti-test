@@ -10,7 +10,7 @@ export async function fetchRankings(): Promise<RankingsSnapshot> {
     throw new Error("NEXT_PUBLIC_CLOUDBASE_ENV_ID is not configured");
   }
 
-  const response = await fetch(`${BASE_URL}/rankings-get`, {
+  const response = await fetch(`${BASE_URL}/sbti-rankings-get`, {
     method: "GET",
     headers: { "Content-Type": "application/json" },
   });
@@ -34,7 +34,7 @@ export async function submitRanking(
     throw new Error("NEXT_PUBLIC_CLOUDBASE_ENV_ID is not configured");
   }
 
-  const response = await fetch(`${BASE_URL}/rankings-submit`, {
+  const response = await fetch(`${BASE_URL}/sbti-rankings-submit`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ submissionId, finalTypeCode }),
