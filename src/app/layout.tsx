@@ -13,7 +13,7 @@ export const metadata: Metadata = {
     template: "%s | SBTI",
   },
   description:
-    "基于 SBTI 题库与类型图鉴重构的镜像测试站，支持移动端、本地榜单与裂变分享。",
+    "SBTI 赛博人格测试站，支持移动端、本地榜单与裂变分享。",
   icons: {
     icon: [
       { url: "/brand/sbti-logo.svg", type: "image/svg+xml" },

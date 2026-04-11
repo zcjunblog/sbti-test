@@ -34,7 +34,7 @@ const capabilityItems = [
   {
     icon: Sparkles,
     title: "原题库完整复刻",
-    desc: "保留原始问题文本、类型图鉴和隐藏饮酒支线，并重建了本地判定逻辑。",
+    desc: "保留完整问题文本、类型图鉴和隐藏饮酒支线，配合本地判定逻辑。",
   },
   {
     icon: Smartphone,
@@ -71,15 +71,15 @@ export default async function HomePage() {
         <div className="grid gap-10 px-6 py-8 sm:px-8 sm:py-10 lg:grid-cols-[1.05fr_0.95fr] lg:px-10 lg:py-12">
           <div className="space-y-8">
             <div className="space-y-5">
-              <p className="eyebrow">镜像重构版</p>
+              <p className="eyebrow">开源重构版</p>
               <h1 className="font-display text-5xl leading-[1.04] text-[var(--ink-strong)] sm:text-6xl lg:text-7xl">
                 一套更适合传播的
                 <br />
                 赛博人格测试站
               </h1>
               <p className="max-w-2xl text-base leading-8 text-[var(--ink-soft)] sm:text-lg">
-                我们把 `sbti.dev` 的核心玩法完整落地到本地项目里，
-                保留题库、人格图鉴和隐藏分支，同时把界面换成更大气的视觉系统，
+                基于 SBTI 赛博人格测试的核心玩法重新设计，
+                保留完整题库、人格图鉴和隐藏分支，配合全新视觉系统，
                 让它在桌面端、移动端和社交裂变场景里都更能打。
               </p>
             </div>

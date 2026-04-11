@@ -2,6 +2,13 @@
   "name": "sbti-cloudbase",
   "version": "0.1.0",
   "private": true,
+  "description": "SBTI 赛博人格测试站 — 27 种人格、15 维画像、海报分享",
+  "author": "zhaozc <i@zcjun.com>",
+  "homepage": "https://sbti.x4v.cn",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zcjunblog/sbti-cloudbase.git"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",

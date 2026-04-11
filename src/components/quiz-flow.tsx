@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { RotateCcw, Sparkles } from "lucide-react";
-import { useState, useTransition } from "react";
+import { useCallback, useRef, useState, useTransition } from "react";
 import clsx from "clsx";
 import {
   buildQuestionDeck,
@@ -47,13 +47,22 @@ export function QuizFlow() {
     clearResultSnapshot();
   }
 
+  const [isShuffling, setIsShuffling] = useState(false);
+
   function reshuffleDeck() {
+    try { navigator.vibrate?.(50); } catch {}
+    setIsShuffling(true);
+    setTimeout(() => setIsShuffling(false), 600);
     const shuffledDeck = buildQuestionDeck();
     resetQuizState(
       shuffledDeck,
       "题序已重新洗牌。正式开始后会使用新的随机顺序，隐藏分支的插入位置也会一起更新。",
     );
   }
+
+  const [selectedValue, setSelectedValue] = useState<number | null>(null);
+  const [transitioning, setTransitioning] = useState(false);
+  const transitionTimer = useRef<ReturnType<typeof setTimeout>>(null);
 
   const currentQuestion = deck[index];
   const answeredCount = Object.keys(answers).length;
@@ -75,34 +84,51 @@ export function QuizFlow() {
     clearResultSnapshot();
   }
 
-  function handleSelect(value: number) {
-    if (!currentQuestion || isPending) {
+  const handleSelect = useCallback((value: number) => {
+    if (!currentQuestion || isPending || selectedValue !== null) {
       return;
     }
 
-    const nextAnswers = {
-      ...answers,
-      [currentQuestion.id]: value,
-    };
+    try { navigator.vibrate?.(30); } catch {}
+    setSelectedValue(value);
 
-    const nextDeck = hydrateQuestionDeck(baseDeck, nextAnswers);
-    const isLastQuestion = index >= nextDeck.length - 1;
+    // Phase 1: highlight selected, then fade out after brief pause
+    const fadeOutDelay = setTimeout(() => {
+      setTransitioning(true);
 
-    setAnswers(nextAnswers);
-    setDeck(nextDeck);
+      // Phase 2: after fade-out completes, advance question
+      const advanceDelay = setTimeout(() => {
+        const nextAnswers = {
+          ...answers,
+          [currentQuestion.id]: value,
+        };
 
-    if (isLastQuestion) {
-      startTransition(() => {
-        const result = computeResult(nextAnswers);
-        const snapshot = buildResultSnapshot(result, createSubmissionId());
-        writeResultSnapshot(snapshot);
-        router.push(`/result/${result.finalType.slug}?source=quiz`);
-      });
-      return;
-    }
+        const nextDeck = hydrateQuestionDeck(baseDeck, nextAnswers);
+        const isLastQuestion = index >= nextDeck.length - 1;
 
-    setIndex((value) => value + 1);
-  }
+        setAnswers(nextAnswers);
+        setDeck(nextDeck);
+
+        if (isLastQuestion) {
+          startTransition(() => {
+            const result = computeResult(nextAnswers);
+            const snapshot = buildResultSnapshot(result, createSubmissionId());
+            writeResultSnapshot(snapshot);
+            router.push(`/result/${result.finalType.slug}?source=quiz`);
+          });
+          return;
+        }
+
+        setIndex((prev) => prev + 1);
+        setSelectedValue(null);
+        setTransitioning(false);
+      }, 300);
+
+      transitionTimer.current = advanceDelay;
+    }, 250);
+
+    transitionTimer.current = fadeOutDelay;
+  }, [currentQuestion, isPending, selectedValue, answers, baseDeck, index, router, startTransition]);
 
   if (!started) {
     return (
@@ -130,9 +156,9 @@ export function QuizFlow() {
               <button
                 type="button"
                 onClick={reshuffleDeck}
-                className="inline-flex items-center justify-center gap-2 rounded-full border border-black/8 bg-white/75 px-6 py-3 text-sm font-semibold text-[var(--ink-strong)] transition hover:bg-white"
+                className="inline-flex items-center justify-center gap-2 rounded-full border border-black/8 bg-white/75 px-6 py-3 text-sm font-semibold text-[var(--ink-strong)] transition hover:bg-white active:scale-95 active:opacity-60"
               >
-                <RotateCcw size={15} />
+                <RotateCcw size={15} className={clsx("transition-transform duration-500", isShuffling && "animate-[spin-once_0.5s_ease-in-out]")} />
                 重新洗牌题序
               </button>
             </div>
@@ -204,7 +230,12 @@ export function QuizFlow() {
         </div>
       </div>
 
-      <div className="space-y-8 p-6 sm:p-8 md:p-10">
+      <div
+        className={clsx(
+          "space-y-8 p-6 transition-all duration-300 sm:p-8 md:p-10",
+          transitioning ? "translate-y-2 opacity-0" : "translate-y-0 opacity-100",
+        )}
+      >
         <div className="space-y-4">
           <span className="inline-flex rounded-full border border-[var(--gold)]/20 bg-[var(--gold-mist)] px-3 py-1 text-xs font-semibold tracking-[0.18em] text-[var(--emerald)] uppercase">
             请按直觉作答
@@ -218,27 +249,41 @@ export function QuizFlow() {
         </div>
 
         <div className="grid gap-4">
-          {currentQuestion?.options.map((option, optionIndex) => (
-            <button
-              key={`${currentQuestion.id}_${option.value}`}
-              type="button"
-              onClick={() => handleSelect(option.value)}
-              disabled={isPending}
-              className={clsx(
-                "group rounded-[26px] border border-black/6 bg-white/85 px-5 py-5 text-left shadow-[0_16px_40px_rgba(17,24,39,0.06)] transition hover:-translate-y-0.5 hover:border-[var(--emerald)]/20 hover:shadow-[0_24px_52px_rgba(17,24,39,0.08)] sm:px-6",
-                isPending ? "opacity-70" : "",
-              )}
-            >
-              <div className="flex items-start gap-4">
-                <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--paper-strong)] text-sm font-semibold text-[var(--emerald)]">
-                  {optionIndex + 1}
-                </span>
-                <span className="pt-1 text-base leading-8 text-[var(--ink-strong)] sm:text-lg">
-                  {option.label}
-                </span>
-              </div>
-            </button>
-          ))}
+          {currentQuestion?.options.map((option, optionIndex) => {
+            const isSelected = selectedValue === option.value;
+            const isUnselected = selectedValue !== null && !isSelected;
+            return (
+              <button
+                key={`${currentQuestion.id}_${option.value}`}
+                type="button"
+                onClick={() => handleSelect(option.value)}
+                disabled={isPending || selectedValue !== null}
+                className={clsx(
+                  "group rounded-[26px] border px-5 py-5 text-left shadow-[0_16px_40px_rgba(17,24,39,0.06)] transition-all duration-200 sm:px-6",
+                  isSelected
+                    ? "scale-[0.98] border-[var(--emerald)] bg-[var(--emerald)]/8 shadow-[0_8px_24px_rgba(11,93,83,0.15)]"
+                    : isUnselected
+                      ? "border-black/4 opacity-40"
+                      : "border-black/6 bg-white/85 hover:-translate-y-0.5 hover:border-[var(--emerald)]/20 hover:shadow-[0_24px_52px_rgba(17,24,39,0.08)] active:scale-[0.97] active:opacity-60",
+                  isPending ? "opacity-70" : "",
+                )}
+              >
+                <div className="flex items-start gap-4">
+                  <span className={clsx(
+                    "inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-semibold transition-colors duration-200",
+                    isSelected
+                      ? "bg-[var(--emerald)] text-white"
+                      : "bg-[var(--paper-strong)] text-[var(--emerald)]",
+                  )}>
+                    {isSelected ? "✓" : optionIndex + 1}
+                  </span>
+                  <span className="pt-1 text-base leading-8 text-[var(--ink-strong)] sm:text-lg">
+                    {option.label}
+                  </span>
+                </div>
+              </button>
+            );
+          })}
         </div>
 
         {isPending ? (

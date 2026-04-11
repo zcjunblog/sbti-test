@@ -1,7 +1,7 @@
 {
   "snapshot": {
-    "totalSubmissions": 29290,
-    "updatedAt": "2026-04-10T10:21:32.038Z",
+    "totalSubmissions": 29291,
+    "updatedAt": "2026-04-11T01:19:30.217Z",
     "entries": [
       {
         "typeCode": "SEXY",
@@ -95,9 +95,9 @@
         "typeCode": "GOGO",
         "slug": "gogo",
         "cn": "行者",
-        "count": 1108,
+        "count": 1109,
         "rank": 12,
-        "share": 0.0378
+        "share": 0.0379
       },
       {
         "typeCode": "FAKE",
@@ -221,5 +221,10 @@
       }
     ]
   },
-  "submissions": {}
+  "submissions": {
+    "d338f40f-6665-4fa4-a3c7-d9f12a92e42b": {
+      "submittedAt": "2026-04-11T01:19:30.217Z",
+      "typeCode": "GOGO"
+    }
+  }
 }

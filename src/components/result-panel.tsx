@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import {
+  ArrowUpRight,
   Download,
   Link2,
   Medal,
@@ -13,7 +14,6 @@ import {
 } from "lucide-react";
 import { useEffect, useMemo, useState, useTransition } from "react";
 import QRCode from "qrcode";
-import { TypeCard } from "@/components/type-card";
 import {
   getCanonicalResultPath,
   getCanonicalType,
@@ -96,6 +96,12 @@ export function ResultPanel({ type, suggestedTypes }: ResultPanelProps) {
       }
     };
   }, [posterPreviewUrl]);
+
+  useEffect(() => {
+    if (!actionMessage) return;
+    const timer = setTimeout(() => setActionMessage(null), 3500);
+    return () => clearTimeout(timer);
+  }, [actionMessage]);
 
   const cameFromQuiz = searchParams.get("source") === "quiz";
   const hasMatchingSnapshot = snapshot?.finalTypeCode === type.code;
@@ -183,10 +189,24 @@ export function ResultPanel({ type, suggestedTypes }: ResultPanelProps) {
     context.fillText(type.intro, 84, 348);
 
     context.save();
-    context.beginPath();
-    context.roundRect(512, 92, 470, 642, 42);
-    context.clip();
-    context.drawImage(typeImage, 512, 92, 470, 642);
+    {
+      const boxX = 480;
+      const boxY = 60;
+      const boxW = 540;
+      const boxH = 740;
+      context.beginPath();
+      context.roundRect(boxX, boxY, boxW, boxH, 42);
+      context.clip();
+      const imgW = typeImage.naturalWidth || typeImage.width;
+      const imgH = typeImage.naturalHeight || typeImage.height;
+      const scale = Math.min(boxW / imgW, boxH / imgH);
+      const drawW = imgW * scale;
+      const drawH = imgH * scale;
+      // align bottom-right within the box
+      const drawX = boxX + (boxW - drawW);
+      const drawY = boxY + (boxH - drawH);
+      context.drawImage(typeImage, drawX, drawY, drawW, drawH);
+    }
     context.restore();
 
     context.fillStyle = "#ffffff";
@@ -267,6 +287,7 @@ export function ResultPanel({ type, suggestedTypes }: ResultPanelProps) {
     try {
       await navigator.clipboard.writeText(shareUrl);
       if (!silent) {
+        try { navigator.vibrate?.(50); } catch {}
         setActionMessage("结果链接已复制，直接粘到微信或群聊里就能发。");
       }
     } catch {
@@ -446,12 +467,12 @@ export function ResultPanel({ type, suggestedTypes }: ResultPanelProps) {
                 {type.special ? "隐藏人格" : "标准人格"}
               </span>
             </div>
-            <div className="relative mx-auto aspect-[4/4.6] max-w-[26rem]">
+            <div className="relative mx-auto aspect-[4/4.6] max-w-[18rem] sm:max-w-[20rem]">
               <Image
                 src={type.image}
                 alt={`${type.cn}插画`}
                 fill
-                sizes="(max-width: 1024px) 100vw, 45vw"
+                sizes="(max-width: 640px) 288px, 320px"
                 className="object-contain object-bottom"
                 priority
               />
@@ -530,11 +551,7 @@ export function ResultPanel({ type, suggestedTypes }: ResultPanelProps) {
               </div>
             ) : null}
 
-            {actionMessage ? (
-              <div className="rounded-[22px] border border-black/6 bg-[var(--paper-strong)] px-5 py-4 text-sm leading-7 text-[var(--ink-soft)]">
-                {actionMessage}
-              </div>
-            ) : null}
+            {/* toast rendered at portal level below */}
           </div>
         </div>
       </section>
@@ -659,14 +676,9 @@ export function ResultPanel({ type, suggestedTypes }: ResultPanelProps) {
             ) : null}
           </section>
 
-          <section className="panel rounded-[32px] p-6 sm:p-8">
+          <section className="panel rounded-[32px] p-5 sm:p-6">
             <div className="flex items-center justify-between gap-4">
-              <div>
-                <p className="eyebrow">继续逛</p>
-                <h2 className="mt-2 font-display text-2xl text-[var(--ink-strong)]">
-                  你可能还会想看
-                </h2>
-              </div>
+              <p className="eyebrow">继续逛</p>
               <Link
                 href="/types"
                 className="text-sm font-semibold text-[var(--emerald)] transition hover:text-[var(--emerald-strong)]"
@@ -674,14 +686,32 @@ export function ResultPanel({ type, suggestedTypes }: ResultPanelProps) {
                 查看全部图鉴
               </Link>
             </div>
-            <div className="mt-6 grid gap-4">
+            <div className="mt-4 grid gap-3">
               {suggestedTypes.map((suggestedType) => (
-                <TypeCard
+                <Link
                   key={suggestedType.code}
-                  type={suggestedType}
-                  compact
-                  className="rounded-[28px]"
-                />
+                  href={`/result/${suggestedType.slug}`}
+                  className="group grid grid-cols-[3.5rem_1fr_auto] items-center gap-3 rounded-[20px] border border-black/6 bg-[var(--paper-strong)] px-3 py-3 transition hover:-translate-y-0.5 hover:border-[var(--emerald)]/18 hover:bg-white"
+                >
+                  <div className="relative h-14 w-14 overflow-hidden rounded-[14px] bg-[radial-gradient(circle_at_top,rgba(14,88,77,0.18),rgba(255,255,255,0)_62%),linear-gradient(180deg,rgba(8,34,30,0.05),rgba(255,255,255,0.94)_72%)]">
+                    <Image
+                      src={suggestedType.image}
+                      alt={`${suggestedType.cn}插画`}
+                      fill
+                      sizes="56px"
+                      className="object-contain object-bottom p-1"
+                    />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="font-display text-base font-semibold text-[var(--ink-strong)]">
+                      {suggestedType.cn}
+                    </p>
+                    <p className="mt-0.5 truncate text-xs text-[var(--ink-soft)]">
+                      {getDisplayCode(suggestedType.code)} · {suggestedType.intro}
+                    </p>
+                  </div>
+                  <ArrowUpRight size={15} className="shrink-0 text-[var(--ink-soft)] transition group-hover:text-[var(--emerald)]" />
+                </Link>
               ))}
             </div>
           </section>
@@ -690,64 +720,49 @@ export function ResultPanel({ type, suggestedTypes }: ResultPanelProps) {
 
       {posterPreviewUrl ? (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-3 sm:p-6 backdrop-blur-sm"
           role="dialog"
           aria-modal="true"
           aria-label="海报预览"
           onClick={closePosterPreview}
         >
           <div
-            className="panel relative w-full max-w-5xl rounded-[32px] p-4 sm:p-6"
+            className="relative flex max-h-full w-full max-w-sm flex-col gap-3"
             onClick={(event) => event.stopPropagation()}
           >
-            <button
-              type="button"
-              onClick={closePosterPreview}
-              className="absolute right-4 top-4 inline-flex h-10 w-10 items-center justify-center rounded-full border border-black/8 bg-white/80 text-sm font-semibold text-[var(--ink-strong)] transition hover:bg-white"
-              aria-label="关闭海报预览"
-            >
-              ×
-            </button>
-
-            <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_18rem] lg:items-start">
-              <div className="overflow-hidden rounded-[26px] border border-black/6 bg-[var(--paper-strong)]">
-                <img
-                  src={posterPreviewUrl}
-                  alt={`${type.cn}海报预览`}
-                  className="block h-auto w-full"
-                />
-              </div>
-
-              <div className="flex flex-col gap-4 pt-2">
-                <p className="eyebrow">海报预览</p>
-                <div className="space-y-3">
-                  <h2 className="font-display text-3xl text-[var(--ink-strong)]">
-                    确认后再下载
-                  </h2>
-                  <p className="text-sm leading-7 text-[var(--ink-soft)]">
-                    这是一张 1080 × 1600 的 PNG 海报，适合发微信、朋友圈和社群。确认没问题后再下载到本地。
-                  </p>
-                </div>
-
-                <div className="grid gap-3">
-                  <button
-                    type="button"
-                    onClick={confirmPosterDownload}
-                    className="inline-flex items-center justify-center gap-2 rounded-full bg-[var(--emerald)] px-5 py-3 text-sm font-semibold !text-white shadow-[0_18px_32px_rgba(6,63,55,0.22)] transition hover:-translate-y-0.5 hover:bg-[var(--emerald-strong)]"
-                  >
-                    <Download size={16} />
-                    确认下载
-                  </button>
-                  <button
-                    type="button"
-                    onClick={closePosterPreview}
-                    className="inline-flex items-center justify-center rounded-full border border-black/8 bg-white/80 px-5 py-3 text-sm font-semibold text-[var(--ink-strong)] transition hover:bg-white"
-                  >
-                    取消
-                  </button>
-                </div>
-              </div>
+            <div className="min-h-0 flex-1 overflow-hidden rounded-[18px] border border-black/6 shadow-[0_30px_80px_rgba(0,0,0,0.3)]">
+              <img
+                src={posterPreviewUrl}
+                alt={`${type.cn}海报预览`}
+                className="block h-full w-full object-contain"
+              />
             </div>
+
+            <div className="grid shrink-0 grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={closePosterPreview}
+                className="inline-flex items-center justify-center rounded-full border border-white/20 bg-white/90 px-4 py-2.5 text-sm font-semibold text-[var(--ink-strong)] backdrop-blur-sm transition hover:bg-white"
+              >
+                取消
+              </button>
+              <button
+                type="button"
+                onClick={confirmPosterDownload}
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-[var(--emerald)] px-4 py-2.5 text-sm font-semibold !text-white shadow-[0_18px_32px_rgba(6,63,55,0.22)] transition hover:-translate-y-0.5 hover:bg-[var(--emerald-strong)]"
+              >
+                <Download size={15} />
+                保存海报
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {actionMessage ? (
+        <div className="pointer-events-none fixed inset-0 z-[60] flex items-center justify-center">
+          <div className="pointer-events-auto animate-[toast-in_0.25s_ease-out] rounded-2xl bg-black/70 px-6 py-4 text-center text-sm font-medium text-white shadow-[0_8px_30px_rgba(0,0,0,0.25)] backdrop-blur-sm">
+            {actionMessage}
           </div>
         </div>
       ) : null}

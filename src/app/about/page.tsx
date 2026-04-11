@@ -157,7 +157,7 @@ export default function AboutPage() {
           </h2>
           <div className="mt-6 space-y-4 text-sm leading-7 text-[var(--ink-soft)]">
             <p>
-              站内插画与原题库内容已经镜像到本地，继续以 CC BY-NC-SA 方式使用，
+              站内插画与题库内容以 CC BY-NC-SA 方式共享，
               适合学习、展示和非商业化的二次创作部署。
             </p>
             <p>
