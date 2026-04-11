@@ -1,0 +1,41 @@
+{
+  "envId": "{{env.TCB_ENV_ID}}",
+  "version": "2.0",
+  "framework": {
+    "name": "sbti-cloudbase",
+    "plugins": {
+      "client": {
+        "use": "@cloudbase/framework-plugin-website",
+        "inputs": {
+          "outputPath": "out",
+          "cloudPath": "/",
+          "ignore": [".git", "node_modules"]
+        }
+      },
+      "server": {
+        "use": "@cloudbase/framework-plugin-function",
+        "inputs": {
+          "functionRootPath": "functions",
+          "functions": [
+            {
+              "name": "rankings-get",
+              "runtime": "Nodejs18.15",
+              "handler": "index.main",
+              "timeout": 10,
+              "memorySize": 256,
+              "installDependency": true
+            },
+            {
+              "name": "rankings-submit",
+              "runtime": "Nodejs18.15",
+              "handler": "index.main",
+              "timeout": 10,
+              "memorySize": 256,
+              "installDependency": true
+            }
+          ]
+        }
+      }
+    }
+  }
+}

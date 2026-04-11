@@ -23,6 +23,7 @@ import {
   type ResultSnapshot,
 } from "@/lib/quiz";
 import { getDisplayCode, type SbtiType } from "@/lib/sbti-data";
+import { submitRanking } from "@/lib/cloudbase-api";
 
 type SubmitResponse =
   | {
@@ -408,22 +409,10 @@ export function ResultPanel({ type, suggestedTypes }: ResultPanelProps) {
       setActionMessage(null);
 
       try {
-        const response = await fetch("/api/rankings/submit", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            submissionId: snapshot.submissionId,
-            finalTypeCode: snapshot.finalTypeCode,
-          }),
-        });
-
-        const data = (await response.json()) as SubmitResponse;
-
-        if (!response.ok) {
-          throw new Error("Request failed");
-        }
+        const data = await submitRanking(
+          snapshot.submissionId,
+          snapshot.finalTypeCode,
+        ) as SubmitResponse;
 
         if (!data.accepted) {
           if (data.reason === "duplicate") {

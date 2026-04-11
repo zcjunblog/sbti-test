@@ -1,8 +1,13 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import { ArrowLeft } from "lucide-react";
 import { notFound } from "next/navigation";
 import { ResultPanel } from "@/components/result-panel";
-import { getSuggestedTypes, getTypeBySlug } from "@/lib/sbti-data";
+import { getSuggestedTypes, getTypeBySlug, types } from "@/lib/sbti-data";
+
+export function generateStaticParams() {
+  return types.map((t) => ({ slug: t.slug }));
+}
 
 type ResultPageProps = {
   params: Promise<{
@@ -31,7 +36,9 @@ export default async function ResultPage({ params }: ResultPageProps) {
           返回人格图鉴
         </Link>
       </div>
-      <ResultPanel type={type} suggestedTypes={suggestedTypes} />
+      <Suspense>
+        <ResultPanel type={type} suggestedTypes={suggestedTypes} />
+      </Suspense>
     </div>
   );
 }
