@@ -139,6 +139,8 @@ export function SiteChrome({ children }: { children: React.ReactNode }) {
             <Link href="/legal/privacy" className="transition hover:text-[var(--emerald)]">隐私政策</Link>
             <span className="text-black/15">|</span>
             <Link href="/legal/disclaimer" className="transition hover:text-[var(--emerald)]">免责声明</Link>
+            <span className="text-black/15">|</span>
+            <Link href="/about-us" className="transition hover:text-[var(--emerald)]">关于我们</Link>
             <span className="ml-auto text-black/30">&copy; {new Date().getFullYear()} SBTI Cloudbase</span>
           </div>
         </div>

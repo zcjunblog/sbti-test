@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { RotateCcw, Sparkles } from "lucide-react";
+import { ChevronLeft, ChevronRight, RotateCcw, Sparkles } from "lucide-react";
 import { useCallback, useRef, useState, useTransition } from "react";
 import clsx from "clsx";
 import {
@@ -129,6 +129,41 @@ export function QuizFlow() {
 
     transitionTimer.current = fadeOutDelay;
   }, [currentQuestion, isPending, selectedValue, answers, baseDeck, index, router, startTransition]);
+
+  function goBack() {
+    if (index <= 0 || isPending || selectedValue !== null) return;
+    setTransitioning(true);
+    setTimeout(() => {
+      const prevQuestion = deck[index - 1];
+      if (prevQuestion) {
+        const nextAnswers = { ...answers };
+        delete nextAnswers[prevQuestion.id];
+        setAnswers(nextAnswers);
+        setDeck(hydrateQuestionDeck(baseDeck, nextAnswers));
+      }
+      setIndex((prev) => prev - 1);
+      setSelectedValue(null);
+      setTransitioning(false);
+    }, 200);
+  }
+
+  function goForward() {
+    if (!currentQuestion || isPending || selectedValue !== null) return;
+    // Can only go forward if current question is already answered
+    if (answers[currentQuestion.id] === undefined) return;
+    const nextDeck = hydrateQuestionDeck(baseDeck, answers);
+    if (index >= nextDeck.length - 1) return;
+    setTransitioning(true);
+    setTimeout(() => {
+      setDeck(nextDeck);
+      setIndex((prev) => prev + 1);
+      setSelectedValue(null);
+      setTransitioning(false);
+    }, 200);
+  }
+
+  const canGoBack = index > 0 && !isPending && selectedValue === null;
+  const canGoForward = currentQuestion && answers[currentQuestion.id] !== undefined && index < deck.length - 1 && !isPending && selectedValue === null;
 
   if (!started) {
     return (
@@ -284,6 +319,30 @@ export function QuizFlow() {
               </button>
             );
           })}
+        </div>
+
+        <div className="flex items-center justify-between">
+          <button
+            type="button"
+            onClick={goBack}
+            disabled={!canGoBack}
+            className="inline-flex items-center gap-1.5 rounded-full border border-black/6 bg-white/75 px-4 py-2 text-sm font-medium text-[var(--ink-soft)] transition hover:bg-white active:scale-95 active:opacity-60 disabled:pointer-events-none disabled:opacity-30"
+          >
+            <ChevronLeft size={16} />
+            上一题
+          </button>
+          <span className="text-xs text-[var(--ink-soft)]">
+            {Math.min(index + 1, deck.length)} / {deck.length}
+          </span>
+          <button
+            type="button"
+            onClick={goForward}
+            disabled={!canGoForward}
+            className="inline-flex items-center gap-1.5 rounded-full border border-black/6 bg-white/75 px-4 py-2 text-sm font-medium text-[var(--ink-soft)] transition hover:bg-white active:scale-95 active:opacity-60 disabled:pointer-events-none disabled:opacity-30"
+          >
+            下一题
+            <ChevronRight size={16} />
+          </button>
         </div>
 
         {isPending ? (

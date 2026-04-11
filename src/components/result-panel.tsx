@@ -112,6 +112,11 @@ export function ResultPanel({ type, suggestedTypes }: ResultPanelProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [snapshot]);
 
+  const [isWeChat, setIsWeChat] = useState(false);
+  useEffect(() => {
+    setIsWeChat(/MicroMessenger/i.test(navigator.userAgent));
+  }, []);
+
   const cameFromQuiz = searchParams.get("source") === "quiz";
   const hasMatchingSnapshot = snapshot?.finalTypeCode === type.code;
   const personalizedItems = hasMatchingSnapshot
@@ -501,15 +506,17 @@ export function ResultPanel({ type, suggestedTypes }: ResultPanelProps) {
                 <Link2 size={16} />
                 复制链接
               </button>
-              <button
-                type="button"
-                onClick={shareNatively}
-                disabled={busyAction === "share"}
-                className="inline-flex items-center justify-center gap-2 rounded-full border border-black/8 bg-white/80 px-5 py-3 text-sm font-semibold text-[var(--ink-strong)] transition hover:bg-white disabled:opacity-70"
-              >
-                <Share2 size={16} />
-                {busyAction === "share" ? "准备分享" : "系统分享"}
-              </button>
+              {!isWeChat && (
+                <button
+                  type="button"
+                  onClick={shareNatively}
+                  disabled={busyAction === "share"}
+                  className="inline-flex items-center justify-center gap-2 rounded-full border border-black/8 bg-white/80 px-5 py-3 text-sm font-semibold text-[var(--ink-strong)] transition hover:bg-white disabled:opacity-70"
+                >
+                  <Share2 size={16} />
+                  {busyAction === "share" ? "准备分享" : "系统分享"}
+                </button>
+              )}
               <button
                 type="button"
                 onClick={downloadPoster}
@@ -522,7 +529,9 @@ export function ResultPanel({ type, suggestedTypes }: ResultPanelProps) {
             </div>
 
             <p className="text-xs leading-6 text-[var(--ink-soft)]">
-              复制链接适合直接丢群里，系统分享适合手机端转发，海报适合朋友圈与社媒传播。
+              {isWeChat
+                ? "点击「预览海报」生成海报，长按图片即可转发给好友或保存到相册发朋友圈。"
+                : "复制链接适合直接丢群里，系统分享适合手机端转发，海报适合朋友圈与社媒传播。"}
             </p>
 
             {hasMatchingSnapshot && snapshot ? (
@@ -739,6 +748,12 @@ export function ResultPanel({ type, suggestedTypes }: ResultPanelProps) {
             className="relative flex max-h-full w-full max-w-sm flex-col gap-3"
             onClick={(event) => event.stopPropagation()}
           >
+            {isWeChat && (
+              <div className="shrink-0 rounded-full bg-black/60 px-4 py-2 text-center text-xs font-medium text-white backdrop-blur-sm">
+                长按海报图片 → 转发给朋友 / 保存到相册
+              </div>
+            )}
+
             <div className="min-h-0 flex-1 overflow-hidden rounded-[18px] border border-black/6 shadow-[0_30px_80px_rgba(0,0,0,0.3)]">
               <img
                 src={posterPreviewUrl}
@@ -747,22 +762,34 @@ export function ResultPanel({ type, suggestedTypes }: ResultPanelProps) {
               />
             </div>
 
-            <div className="grid shrink-0 grid-cols-2 gap-3">
-              <button
-                type="button"
-                onClick={closePosterPreview}
-                className="inline-flex items-center justify-center rounded-full border border-white/20 bg-white/90 px-4 py-2.5 text-sm font-semibold text-[var(--ink-strong)] backdrop-blur-sm transition hover:bg-white"
-              >
-                取消
-              </button>
-              <button
-                type="button"
-                onClick={confirmPosterDownload}
-                className="inline-flex items-center justify-center gap-2 rounded-full bg-[var(--emerald)] px-4 py-2.5 text-sm font-semibold !text-white shadow-[0_18px_32px_rgba(6,63,55,0.22)] transition hover:-translate-y-0.5 hover:bg-[var(--emerald-strong)]"
-              >
-                <Download size={15} />
-                保存海报
-              </button>
+            <div className={`shrink-0 gap-3 ${isWeChat ? "grid grid-cols-1" : "grid grid-cols-2"}`}>
+              {isWeChat ? (
+                <button
+                  type="button"
+                  onClick={closePosterPreview}
+                  className="inline-flex items-center justify-center rounded-full border border-white/20 bg-white/90 px-4 py-2.5 text-sm font-semibold text-[var(--ink-strong)] backdrop-blur-sm transition hover:bg-white"
+                >
+                  关闭
+                </button>
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    onClick={closePosterPreview}
+                    className="inline-flex items-center justify-center rounded-full border border-white/20 bg-white/90 px-4 py-2.5 text-sm font-semibold text-[var(--ink-strong)] backdrop-blur-sm transition hover:bg-white"
+                  >
+                    取消
+                  </button>
+                  <button
+                    type="button"
+                    onClick={confirmPosterDownload}
+                    className="inline-flex items-center justify-center gap-2 rounded-full bg-[var(--emerald)] px-4 py-2.5 text-sm font-semibold !text-white shadow-[0_18px_32px_rgba(6,63,55,0.22)] transition hover:-translate-y-0.5 hover:bg-[var(--emerald-strong)]"
+                  >
+                    <Download size={15} />
+                    保存海报
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>
