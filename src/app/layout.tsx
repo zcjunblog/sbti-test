@@ -20,6 +20,11 @@ export const metadata: Metadata = {
     ],
     shortcut: ["/brand/sbti-logo.svg"],
   },
+  verification: {
+    other: {
+      "baidu-site-verification": "codeva-NcmIwtLBGm",
+    },
+  },
 };
 
 export default function RootLayout({
