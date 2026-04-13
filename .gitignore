@@ -39,3 +39,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# 微信小程序工程（独立仓库维护，不进本仓库）
+/miniprogram/
+/memory-bank/

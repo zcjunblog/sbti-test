@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { typeByCode, type RankingsSnapshot } from "@/lib/sbti-data";
@@ -70,6 +71,30 @@ export function RankingsLeaders() {
               </article>
             ))
           )}
+        </div>
+
+        {/* 小程序码 + 使用说明 */}
+        <div className="mt-6 grid grid-cols-[1fr_auto] items-center gap-4 rounded-[24px] border border-white/10 bg-white/6 p-4 sm:p-5">
+          <div>
+            <p className="text-xs font-semibold tracking-[0.2em] text-[var(--gold-light)]">
+              MINI PROGRAM
+            </p>
+            <p className="mt-2 font-display text-lg leading-snug sm:text-xl">
+              微信扫码体验「恶搞人格图鉴」小程序
+            </p>
+            <p className="mt-2 text-xs leading-6 text-white/70 sm:text-sm">
+              手机端无需跳转网页，扫码即测，支持分享海报到朋友圈。
+            </p>
+          </div>
+          <div className="relative h-24 w-24 flex-shrink-0 overflow-hidden rounded-2xl bg-white p-1.5 sm:h-28 sm:w-28">
+            <Image
+              src="/brand/miniprogram-qr.png"
+              alt="恶搞人格图鉴 小程序码"
+              fill
+              sizes="112px"
+              className="rounded-xl object-contain"
+            />
+          </div>
         </div>
       </div>
     </div>
