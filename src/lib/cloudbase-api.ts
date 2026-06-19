@@ -1,25 +1,14 @@
-import type { RankingsSnapshot, RankingEntry } from "@/lib/sbti-data";
+import {
+  rankingsSeedSnapshot,
+  type RankingsSnapshot,
+  type RankingEntry,
+} from "@/lib/sbti-data";
 
-const ENV_ID = process.env.NEXT_PUBLIC_CLOUDBASE_ENV_ID ?? "";
-const BASE_URL = ENV_ID
-  ? `https://${ENV_ID}.service.tcloudbase.com`
-  : "";
+// 纯静态版本：榜单数据全部来自本地种子文件 src/data/rankings-seed.json，
+// 不再请求任何服务端。保留原有函数签名，调用方（首页 Top3、榜单页、结果页入榜）无需改动。
 
 export async function fetchRankings(): Promise<RankingsSnapshot> {
-  if (!BASE_URL) {
-    throw new Error("NEXT_PUBLIC_CLOUDBASE_ENV_ID is not configured");
-  }
-
-  const response = await fetch(`${BASE_URL}/sbti-rankings-get`, {
-    method: "GET",
-    headers: { "Content-Type": "application/json" },
-  });
-
-  if (!response.ok) {
-    throw new Error(`Failed to fetch rankings: ${response.status}`);
-  }
-
-  return response.json() as Promise<RankingsSnapshot>;
+  return rankingsSeedSnapshot;
 }
 
 type SubmissionResponse =
@@ -27,22 +16,18 @@ type SubmissionResponse =
   | { accepted: false; reason: "duplicate" | "invalid_payload" | "invalid_type" };
 
 export async function submitRanking(
-  submissionId: string,
+  _submissionId: string,
   finalTypeCode: string,
 ): Promise<SubmissionResponse> {
-  if (!BASE_URL) {
-    throw new Error("NEXT_PUBLIC_CLOUDBASE_ENV_ID is not configured");
+  const entry = rankingsSeedSnapshot.entries.find(
+    (item) => item.typeCode === finalTypeCode,
+  );
+
+  if (!entry) {
+    return { accepted: false, reason: "invalid_type" };
   }
 
-  const response = await fetch(`${BASE_URL}/sbti-rankings-submit`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ submissionId, finalTypeCode }),
-  });
-
-  if (!response.ok && response.status !== 400) {
-    throw new Error(`Submit failed: ${response.status}`);
-  }
-
-  return response.json() as Promise<SubmissionResponse>;
+  // 静态站点没有后端可写入，直接回显本地种子里的排名/人数，
+  // 让结果页「已入榜 · 排名第 N 位」UI 维持原样。
+  return { accepted: true, entry };
 }

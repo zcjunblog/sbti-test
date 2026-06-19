@@ -1,4 +1,6 @@
-# SBTI 赛博人格测定局 - 架构文档（CloudBase 分支）
+# SBTI 赛博人格测定局 - 架构文档（纯静态 / GitHub Pages 分支）
+
+> **重要变更（local 分支）**: 已移除全部 CloudBase 服务端依赖（`functions/`、`scripts/`、`cloudbaserc.json` 已删除）。榜单数据全部来自本地种子 `src/data/rankings-seed.json`，`src/lib/cloudbase-api.ts` 的 `fetchRankings`/`submitRanking` 已改为读取/回显本地种子，不再发起任何网络请求。部署方式改为 GitHub Pages（`.github/workflows/deploy.yml`）。
 
 > **职责**: 记录项目中每个文件的作用，包含完整的数据结构定义。写任何代码前必须完整阅读本文件。每完成一个重大功能或里程碑后，必须更新本文件。
 
@@ -70,7 +72,7 @@ sbti-cloudbase/
 │   ├── lib/
 │   │   ├── sbti-data.ts         # 数据访问层（类型定义 + 数据导出）
 │   │   ├── quiz.ts              # 测试引擎（洗牌、分支、判定、结果快照）
-│   │   └── cloudbase-api.ts     # CloudBase API 客户端（fetchRankings + submitRanking）
+│   │   └── cloudbase-api.ts     # 榜单数据访问（fetchRankings/submitRanking 均读本地种子，无网络请求）
 │   │
 │   └── data/
 │       ├── sbti-data.json       # 核心数据（题库 + 人格类型 + 维度定义）
@@ -84,7 +86,9 @@ sbti-cloudbase/
 
 ---
 
-## 云函数说明
+## 云函数说明（已废弃 — 仅作历史记录）
+
+> ⚠️ local 分支已删除 `functions/` 与对应云数据库。以下内容保留以备将来恢复后端时参考，当前代码不再调用。
 
 ### `sbti-rankings-get` — 查询排行榜
 - 查询 `sbti-rankings` 集合全部文档，按 count 降序
@@ -102,7 +106,9 @@ sbti-cloudbase/
 
 ---
 
-## 云数据库集合
+## 云数据库集合（已废弃 — 仅作历史记录）
+
+> ⚠️ local 分支已不使用云数据库，榜单数据由 `src/data/rankings-seed.json` 提供。
 
 ### `sbti-rankings`（ADMINONLY 权限）
 | 字段 | 类型 | 说明 |
