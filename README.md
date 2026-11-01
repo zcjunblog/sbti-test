@@ -29,8 +29,8 @@ SBTI 赛博人格测试站点，保留完整题库、27 种人格图鉴和隐藏
 
 ```bash
 # 克隆项目
-git clone https://github.com/zcjunblog/sbti-cloudbase.git
-cd sbti-cloudbase
+git clone https://github.com/zcjunblog/sbti-test.git
+cd sbti-test
 
 # 安装依赖
 npm install
